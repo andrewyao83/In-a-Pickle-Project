@@ -4,6 +4,7 @@
 //  Created by Nanbon Biruk on 4/29/25.
 //
 
+ 
 import SwiftUI
 
 struct Player {
@@ -21,81 +22,103 @@ struct RaceGameView: View {
     @State private var isGameActive = false
     @State private var gameStarted = false
     @State private var newPlayerName = ""
-    
+    @State private var winningScore = 0
+
     var body: some View {
-        VStack {
-            Text("Race Game")
-                .font(.custom("Times New Roman", size: 50))
-                .padding()
-            Text(players.isEmpty ? "Add players to start" : "Players: \(players.map { $0.name }.joined(separator: ", "))")
-                .padding()
-            
-            Text("Time Left: \(timeRemaining)")
-                .padding()
-            
-            Text("Score: \(score)")
-                .padding()
-            
-            if !gameStarted {
-                TextField("Enter player name", text: $newPlayerName)
+        ZStack {
+            Image("Gradient")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+
+            VStack {
+                Text("Race Game")
+                    .font(.custom("Times New Roman", size: 50))
+                    .foregroundColor(.white)
                     .padding()
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                
-                Button(action: addPlayer) {
-                    Text("Add Player")
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                .padding()
-            }
-            
-            if players.count > 0 && !gameStarted {
-                Button(action: startGame) {
-                    Text("Start Game")
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                .padding()
-            }
-            
-            if isGameActive {
-                Button(action: tapButtonPressed) {
-                    Text("Tap as fast as you can!")
-                        .font(.title2)
-                        .padding()
-                        .background(Color.orange)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                .padding()
-            }
-            
-            if gameStarted {
-                Button(action: nextTurn) {
-                    Text("Next Player")
-                        .padding()
-                        .background(Color.purple)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                .padding()
-            }
-            
-            if gameStarted && currentPlayerIndex >= players.count {
-                Text("The winner is: \(winnerNames.joined(separator: ", ")) with \(score) taps!")
-                    .font(.headline)
+
+                Text(players.isEmpty ? "Add players to start" : "Players: \(players.map { $0.name }.joined(separator: ", "))")
+                    .foregroundColor(.white)
                     .padding()
+
+                Text("Time Left: \(timeRemaining)")
+                    .foregroundColor(.white)
+                    .padding()
+
+                Text("Score: \(score)")
+                    .foregroundColor(.white)
+                    .padding()
+
+                if !gameStarted {
+                    TextField("Enter player name", text: $newPlayerName)
+                        .padding()
+                        .background(Color.white)
+                        .foregroundColor(.black)
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray, lineWidth: 1)
+                        )
+                        .frame(maxWidth: 300)
+                        .padding()
+
+                    Button(action: addPlayer) {
+                        Text("Add Player")
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding()
+                }
+
+                if players.count > 0 && !gameStarted {
+                    Button(action: startGame) {
+                        Text("Start Game")
+                            .padding()
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding()
+                }
+
+                if isGameActive {
+                    Button(action: tapButtonPressed) {
+                        Text("Tap as fast as you can!")
+                            .font(.title2)
+                            .padding()
+                            .background(Color.orange)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding()
+                }
+
+                if gameStarted && !isGameActive && currentPlayerIndex < players.count {
+                    Button(action: nextTurn) {
+                        Text("Next Player")
+                            .padding()
+                            .background(Color.purple)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding()
+                }
+
+                if gameStarted && currentPlayerIndex >= players.count {
+                    Text("The winner is: \(winnerNames.joined(separator: ", ")) with \(winningScore) taps!")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                }
             }
-        }
-        .onAppear {
-            resetGame()
+            .onAppear {
+                resetGame()
+            }
         }
     }
-    
+
     func addPlayer() {
         if !newPlayerName.isEmpty {
             let newPlayer = Player(name: newPlayerName)
@@ -103,28 +126,28 @@ struct RaceGameView: View {
             newPlayerName = ""
         }
     }
-    
+
     func startGame() {
         gameStarted = true
         startTurn()
     }
-    
+
     func startTurn() {
         if currentPlayerIndex >= players.count {
             showWinner()
             return
         }
-        
+
         score = 0
         timeRemaining = 10
         isGameActive = true
         startTimer()
     }
-    
+
     func tapButtonPressed() {
         score += 1
     }
-    
+
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             DispatchQueue.main.async {
@@ -135,45 +158,33 @@ struct RaceGameView: View {
             }
         }
     }
-    
+
     func endTurn() {
         timer?.invalidate()
         isGameActive = false
-        
         players[currentPlayerIndex].score = score
         currentPlayerIndex += 1
-        
-        if currentPlayerIndex < players.count {
-            // Show the next player button
-            gameStarted = true
-        } else {
+
+        if currentPlayerIndex >= players.count {
             showWinner()
         }
     }
-    
+
     func nextTurn() {
-        score = 0
-        timeRemaining = 10
-        isGameActive = true
         startTurn()
     }
-    
+
     func showWinner() {
-        var highestScore = 0
-        for player in players {
-            if player.score > highestScore {
-                highestScore = player.score
-                winnerNames = [player.name]
-            } else if player.score == highestScore {
-                winnerNames.append(player.name)
-            }
-        }
+        let highestScore = players.map { $0.score }.max() ?? 0
+        winningScore = highestScore
+        winnerNames = players.filter { $0.score == highestScore }.map { $0.name }
     }
-    
+
     func resetGame() {
         players.removeAll()
         currentPlayerIndex = 0
         winnerNames.removeAll()
+        winningScore = 0
         timeRemaining = 10
         score = 0
         gameStarted = false

@@ -1,10 +1,3 @@
-//
-//  PickingGame.swift
-//  In a Pickle
-//
-//  Created by Andrew Yao on 4/29/25.
-//
-
 import SwiftUI
 
 struct Element: Identifiable {
@@ -36,6 +29,7 @@ struct PickingGameView: View {
     @State private var tiedPlayers: [String] = []
     @State private var playerOrder: [String] = []
     @State private var newPlayerName: String = ""
+    @State private var playerLimitReached = false
 
     func startGame() {
         elements = generateFixedElements()
@@ -49,7 +43,7 @@ struct PickingGameView: View {
     }
 
     func distance(from p1: CGPoint, to p2: CGPoint) -> CGFloat {
-        sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2))
+        sqrt(pow(p2.x - p1.x, 2) + pow(p1.y - p2.y, 2))
     }
 
     func handleSelection(element: Element) {
@@ -103,10 +97,22 @@ struct PickingGameView: View {
 
                     Button("Add Player") {
                         if !newPlayerName.isEmpty {
-                            playerNames.append(newPlayerName)
-                            newPlayerName = ""
+                            if playerNames.count < 5 {
+                                playerNames.append(newPlayerName)
+                                newPlayerName = ""
+                                playerLimitReached = false
+                            } else {
+                                playerLimitReached = true
+                            }
                         }
                     }.padding()
+                }
+
+                // Show message if player limit is reached
+                if playerLimitReached {
+                    Text("You can only have 5 players.")
+                        .foregroundColor(.red)
+                        .padding()
                 }
 
                 if playerNames.count > 1 && !roundActive {
