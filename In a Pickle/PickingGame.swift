@@ -1,76 +1,88 @@
 import SwiftUI
 
-struct Element: Identifiable {
+struct Element: Identifiable, Equatable {
     var id: UUID = UUID()
     var name: String
     var imageName: String
     var position: CGPoint
     var isSelected: Bool = false
+
+    static func == (lhs: Element, rhs: Element) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
-func generateFixedElements() -> [Element] {
-    return [
-        Element(name: "Beachball", imageName: "beachball", position: CGPoint(x: 80, y: 100)),
-        Element(name: "Coconut", imageName: "coconut", position: CGPoint(x: 200, y: 100)),
-        Element(name: "Boat", imageName: "boat", position: CGPoint(x: 80, y: 250)),
-        Element(name: "Lifesaver", imageName: "lifesaver", position: CGPoint(x: 200, y: 250)),
-        Element(name: "Surfboard", imageName: "surfboard", position: CGPoint(x: 140, y: 180))
-    ]
+func generatePentagonElements() -> [Element] {
+    let center = CGPoint(x: 150, y: 150)
+    let radius: CGFloat = 100
+    let names = ["Beachball", "Coconut", "Boat", "Lifesaver", "Surfboard"]
+    let imageNames = ["beachball", "coconut", "boat", "lifesaver", "surfboard"]
+
+    return (0..<5).map { i in
+        let angle = 2 * .pi * CGFloat(i) / 5 - .pi / 2
+        let position = CGPoint(x: center.x + radius * cos(angle), y: center.y + radius * sin(angle))
+        return Element(name: names[i], imageName: imageNames[i], position: position)
+    }
 }
 
 struct PickingGameView: View {
     @State private var playerNames: [String] = []
-    @State private var currentTurn = 0
-    @State private var elements: [Element] = []
-    @State private var target: CGPoint = .zero
-    @State private var winner: String?
-    @State private var winningElement: Element? = nil
-    @State private var roundActive = false
-    @State private var tiedPlayers: [String] = []
-    @State private var playerOrder: [String] = []
     @State private var newPlayerName: String = ""
     @State private var playerLimitReached = false
 
+    @State private var elements: [Element] = []
+    @State private var target: CGPoint = .zero
+    @State private var roundActive = false
+    @State private var winner: String?
+    @State private var winningElement: Element?
+    @State private var tiedPlayers: [String] = []
+    @State private var playerOrder: [String] = []
+    @State private var currentTurn: Int = 0
+    @State private var playerSelections: [String: Element] = [:]
+
     func startGame() {
-        elements = generateFixedElements()
-        target = CGPoint(x: CGFloat.random(in: 0..<300), y: CGFloat.random(in: 0..<300))
+        elements = generatePentagonElements()
+        target = CGPoint(x: CGFloat.random(in: 30..<270), y: CGFloat.random(in: 30..<270))
+        roundActive = true
         winner = nil
         winningElement = nil
-        roundActive = true
         tiedPlayers = playerNames
-        playerOrder = playerNames.shuffled()
+        playerOrder = tiedPlayers.shuffled()
         currentTurn = 0
+        playerSelections = [:]
     }
 
     func distance(from p1: CGPoint, to p2: CGPoint) -> CGFloat {
-        sqrt(pow(p2.x - p1.x, 2) + pow(p1.y - p2.y, 2))
+        sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2))
     }
 
     func handleSelection(element: Element) {
-        if let index = elements.firstIndex(where: { $0.id == element.id }) {
-            elements[index].isSelected = true
-        }
+        guard roundActive else { return }
 
-        let picked = elements.filter { $0.isSelected }
-        if picked.count == tiedPlayers.count {
-            var playerDistances: [(String, CGFloat, Element)] = []
-            for (i, player) in tiedPlayers.enumerated() {
-                let selectedElement = picked[i]
-                let dist = distance(from: selectedElement.position, to: target)
-                playerDistances.append((player, dist, selectedElement))
+        let currentPlayer = playerOrder[currentTurn]
+        playerSelections[currentPlayer] = element
+
+        if playerSelections.count == tiedPlayers.count {
+            let distances = playerSelections.map { (player, element) in
+                (player, distance(from: element.position, to: target), element)
             }
 
-            let minDist = playerDistances.map { $0.1 }.min() ?? .infinity
-            let closest = playerDistances.filter { abs($0.1 - minDist) < 1e-5 }
+            let minDist = distances.map { $0.1 }.min() ?? .infinity
+            let closest = distances.filter { abs($0.1 - minDist) < 1e-5 }
 
             if closest.count == 1 {
                 winner = closest.first?.0
                 winningElement = closest.first?.2
                 roundActive = false
             } else {
+                // Tie-breaker
                 tiedPlayers = closest.map { $0.0 }
-                elements = generateFixedElements().filter { !$0.isSelected }
+                playerOrder = tiedPlayers.shuffled()
                 currentTurn = 0
+                playerSelections = [:]
+                elements = generatePentagonElements().filter { element in
+                    !playerSelections.values.contains(where: { $0.id == element.id })
+                }
             }
         } else {
             currentTurn += 1
@@ -82,12 +94,12 @@ struct PickingGameView: View {
             Image("Beach")
                 .resizable()
                 .scaledToFill()
-                .edgesIgnoringSafeArea(.all)
+                .ignoresSafeArea()
 
-            VStack {
-                Text("Beach Picking Game")
-                    .font(.custom("Times New Roman", size: 36))
-                    .foregroundColor(.white)
+            VStack(spacing: 15) {
+                Text(" Beach Picking Game 🏝️")
+                    .font(.custom("Times New Roman", size: 35))
+                    .foregroundColor(Color.white)
                     .padding()
 
                 HStack {
@@ -108,11 +120,9 @@ struct PickingGameView: View {
                     }.padding()
                 }
 
-                // Show message if player limit is reached
                 if playerLimitReached {
                     Text("You can only have 5 players.")
                         .foregroundColor(.red)
-                        .padding()
                 }
 
                 if playerNames.count > 1 && !roundActive {
@@ -125,18 +135,17 @@ struct PickingGameView: View {
                 }
 
                 if roundActive {
-                    Text("Target: \(Int(target.x)), \(Int(target.y))")
+                    Text("🎯 Target: \(Int(target.x)), \(Int(target.y))")
+                        .foregroundColor(.black)
                         .padding()
-                        .foregroundColor(.white)
 
-                    Text("Current Turn: \(tiedPlayers[currentTurn])")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding(.bottom)
+                    Text("Current Turn: \(playerOrder[currentTurn])")
+                        .bold()
+                        .foregroundColor(.black)
 
                     ZStack {
                         ForEach(elements) { element in
-                            if !element.isSelected {
+                            if !playerSelections.values.contains(where: { $0.id == element.id }) {
                                 Image(element.imageName)
                                     .resizable()
                                     .frame(width: 60, height: 60)
@@ -146,35 +155,32 @@ struct PickingGameView: View {
                                     }
                             }
                         }
-
+                        
                         Circle()
-                            .fill(Color.red.opacity(0.5))
+                            .fill(Color.red.opacity(0.05))
                             .frame(width: 10, height: 10)
                             .position(target)
                     }
                     .frame(width: 300, height: 300)
+                    .background(Color.white.opacity(0.3))
+                    .cornerRadius(12)
                 }
 
                 if let winner = winner {
                     Text("🎉 Winner: \(winner) 🎉")
                         .font(.title)
                         .foregroundColor(.green)
-                        .padding()
 
-                    if let winningElement = winningElement {
-                        Image(winningElement.imageName)
+                    if let element = winningElement {
+                        Image(element.imageName)
                             .resizable()
                             .frame(width: 80, height: 80)
-                            .overlay(Color.black.opacity(0.3))
-                            .position(winningElement.position)
-                            .padding()
                     }
                 }
 
-                if tiedPlayers.count > 1 && roundActive {
-                    Text("Tie-breaker for: \(tiedPlayers.joined(separator: ", "))")
-                        .foregroundColor(.white)
-                        .padding()
+                if tiedPlayers.count > 1 && roundActive && playerSelections.isEmpty {
+                    Text("Tie-breaker Round for: \(tiedPlayers.joined(separator: ", "))")
+                        .foregroundColor(.orange)
                 }
             }
             .padding()
