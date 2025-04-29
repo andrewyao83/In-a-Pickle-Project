@@ -17,7 +17,7 @@ struct CompetitiveSelectionView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 250, height: 300)
-                NavigationLink(destination: RaceGame()) {
+                NavigationLink(destination: RaceGameView()) {
                     Text("Race")
                         .font(.custom("Times New Roman", size: 24))
                         .padding()
@@ -26,7 +26,7 @@ struct CompetitiveSelectionView: View {
                         .cornerRadius(15)
                 }
                 
-                NavigationLink(destination: PickingGame()) {
+                NavigationLink(destination: PickingGameView()) {
                     Text("Scavenge")
                         .font(.custom("Times New Roman", size: 24))
                         .padding()

@@ -21,7 +21,7 @@ struct ContentView: View {
                     .offset(y: moveUp ? -100 : 0)
                     .animation(.easeInOut(duration: 2), value: moveUp)
                     .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        DispatchQueue.main.asyncAfter(deadline: .now()) {
                             moveUp = true
                             DispatchQueue.main.asyncAfter(deadline: .now()) {
                                 showContent = true
@@ -34,7 +34,7 @@ struct ContentView: View {
                         .font(.custom("Times New Roman", size: 40))
                         .padding()
                     
-                    NavigationLink(destination: RandomSelectionView()) {
+                    NavigationLink(destination: RandomView()) {
                         Text("Randomized Selection")
                             .font(.custom("Times New Roman", size: 18))
                             .padding()
