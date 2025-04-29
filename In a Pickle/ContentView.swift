@@ -8,52 +8,61 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var isLoading = true
+    @State private var moveUp = false
+    @State private var showContent = false
+    
     var body: some View {
-        VStack {
-            if isLoading {
-                Image(systemName: "LoadingScreenIcon")
+        NavigationView {
+            VStack {
+                // Pickle Icon
+                Image("LoadingScreenIcon")  // Assuming your image is named "LoadingScreenIcon" in your Assets.xcassets
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
-                    .font(.largeTitle)
-                    .foregroundColor(.blue)
-                    .opacity(isLoading ? 1:0)
+                    .offset(y: moveUp ? -100 : 0)
+                    .animation(.easeInOut(duration: 2), value: moveUp)
                     .onAppear{
-                        withAnimation(.bouncy(duration: 2)) {
-                            withAnimation(.easeOut(duration: 2)) {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                    isLoading = false
-                                }
+                        DispatchQueue.main.asyncAfter(deadline: .now() ) {
+                            moveUp = true
+                            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                showContent = true
                             }
                         }
                     }
-                }else{
-                    NavigationView {
-                        VStack{
-                            Text("In a Pickle?")
-                            .font(.largeTitle)
+                
+                if showContent {
+                    Text("In a Pickle?")
+                        .font(.custom("Times New Roman", size: 40))
+                        .padding()
+                    
+                    NavigationLink(destination: RandomSelectionView()) {
+                        Text("Randomized Selection")
+                            .font(.custom("Times New Roman", size: 18))
                             .padding()
-                            NavigationLink(destination: RandomSelectionView()) {
-                            Text("Randomized Selection")
-                                    .padding()
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(8)
-                            }
-                            NavigationLink(destination: CompetitiveSelectionView()) {
-                                Text("Competitive Selection")
-                                    .padding()
-                                    .background(Color.green)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(8)
-                            }
-                        }
-                        .navigationTitle(Text("Home"))
+                            .background(Color.mint)
+                            .foregroundColor(.white)
+                            .cornerRadius(50)
+                    }
+                    
+                    NavigationLink(destination: CompetitiveSelectionView()) {
+                        Text("Competitive Selection")
+                            .font(.custom("Times New Roman", size: 18))
+                            .padding()
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(50)
                     }
                 }
+                
+                
             }
-        .animation(.easeInOut, value: isLoading)
+            .navigationTitle("Home")
         }
     }
+    struct ContentView_Previews: PreviewProvider {
+        static var previews: some View {
+            ContentView()
+        }
+    }
+}
 
