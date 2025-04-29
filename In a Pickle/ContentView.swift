@@ -14,15 +14,14 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             VStack {
-                // Pickle Icon
-                Image("LoadingScreenIcon")  // Assuming your image is named "LoadingScreenIcon" in your Assets.xcassets
+                Image("LoadingScreenIcon")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
                     .offset(y: moveUp ? -100 : 0)
                     .animation(.easeInOut(duration: 2), value: moveUp)
-                    .onAppear{
-                        DispatchQueue.main.asyncAfter(deadline: .now() ) {
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             moveUp = true
                             DispatchQueue.main.asyncAfter(deadline: .now()) {
                                 showContent = true
@@ -53,16 +52,14 @@ struct ContentView: View {
                             .cornerRadius(50)
                     }
                 }
-                
-                
             }
-            .navigationTitle("Home")
-        }
-    }
-    struct ContentView_Previews: PreviewProvider {
-        static var previews: some View {
-            ContentView()
+            .navigationBarHidden(true)
         }
     }
 }
 
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+}

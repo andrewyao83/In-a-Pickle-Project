@@ -8,10 +8,34 @@ import SwiftUI
 
 struct CompetitiveSelectionView: View {
     var body: some View {
-        VStack {
-            Text("Fight for the Verdict")
-                .font(.largeTitle)
-                .padding()
+        NavigationView {
+            VStack(spacing: 20) {
+                Text("Fight for the Verdict")
+                    .font(.custom("Times New Roman", size: 36))
+                    .padding()
+                Image("Luka")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 250, height: 300)
+                NavigationLink(destination: RaceGame()) {
+                    Text("Race")
+                        .font(.custom("Times New Roman", size: 24))
+                        .padding()
+                        .foregroundColor(.white)
+                        .background(Color.black)
+                        .cornerRadius(15)
+                }
+                
+                NavigationLink(destination: PickingGame()) {
+                    Text("Scavenge")
+                        .font(.custom("Times New Roman", size: 24))
+                        .padding()
+                        .foregroundColor(.white)
+                        .background(Color.black)
+                        .cornerRadius(15)
+                }
+            }
+            .navigationBarTitle("Competitive Mode")
         }
     }
 }
@@ -21,4 +45,3 @@ struct CompetitiveSelectionView_Previews: PreviewProvider {
         CompetitiveSelectionView()
     }
 }
-

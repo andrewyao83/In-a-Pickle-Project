@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		41F433BA2DC0F6490022B75D /* RaceGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41F433B92DC0F6400022B75D /* RaceGame.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		4130B44B2DBE05B7001D08CB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		4130B43C2DBE05B6001D08CB /* In a Pickle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "In a Pickle.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4130B44A2DBE05B7001D08CB /* In a PickleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "In a PickleTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4130B4542DBE05B7001D08CB /* In a PickleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "In a PickleUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		41F433B92DC0F6400022B75D /* RaceGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RaceGame.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +80,7 @@
 		4130B4332DBE05B6001D08CB = {
 			isa = PBXGroup;
 			children = (
+				41F433B92DC0F6400022B75D /* RaceGame.swift */,
 				4130B43E2DBE05B6001D08CB /* In a Pickle */,
 				4130B44D2DBE05B7001D08CB /* In a PickleTests */,
 				4130B4572DBE05B7001D08CB /* In a PickleUITests */,
@@ -236,6 +242,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41F433BA2DC0F6490022B75D /* RaceGame.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
